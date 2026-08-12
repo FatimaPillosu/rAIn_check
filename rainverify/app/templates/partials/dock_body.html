@@ -1,0 +1,33 @@
+<div class="chat-history" id="chat-history">
+  {% for msg in chat_history %}
+    <div class="msg {{ msg.role }}">
+      <div class="who">{{ msg.role }}</div>
+      <div>{{ msg.text }}</div>
+      {% if msg.proposal %}
+        <div class="proposal">
+          <div><em>{{ msg.proposal.reason }}</em></div>
+          {% if msg.proposal.tool %}<div>Proposed tool: <code>{{ msg.proposal.tool }}</code></div>{% endif %}
+          {% if not msg.proposal.executed %}
+          <div class="proposal-buttons">
+            <form style="display:inline" hx-post="/chat/approve" hx-target="#dock-body" hx-swap="innerHTML">
+              <input type="hidden" name="index" value="{{ loop.index0 }}">
+              <button class="btn" type="submit">Approve</button>
+              <button class="btn secondary" type="submit" name="action" value="skip">Skip</button>
+            </form>
+          </div>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  {% else %}
+    <div class="msg assistant"><div class="who">assistant</div><div>
+      Hello — I'm the rAIn_check assistant. Ask me about a score (e.g. "what is CRPS?"), or
+      ask me to check data quality, compute scores, or explain a recent error. I only ever
+      call tools and quote knowledge cards — I never state a number from memory.
+    </div></div>
+  {% endfor %}
+</div>
+<form hx-post="/chat/send" hx-target="#dock-body" hx-swap="innerHTML">
+  <textarea name="message" rows="3" placeholder="Ask the assistant..."></textarea>
+  <button class="btn" type="submit">Send</button>
+</form>

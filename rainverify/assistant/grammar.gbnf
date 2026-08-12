@@ -1,0 +1,31 @@
+## GBNF grammar (plan §3.3, §9): constrains the model, character by character, to emit
+## only a well-formed {"tool": ..., "args": {...}} JSON tool call — never free prose,
+## never a malformed call the engine would have to guess at.
+
+root       ::= "{" ws "\"tool\"" ws ":" ws tool-name ws "," ws "\"args\"" ws ":" ws object ws "}"
+
+tool-name  ::= "\"" ("list_data" | "inspect_file" | "propose_recipe" | "run_qc" | "compute_scores" | "make_plot" | "get_card" | "explain_last_error") "\""
+
+object     ::= "{" ws (member (ws "," ws member)*)? ws "}"
+member     ::= string ws ":" ws value
+array      ::= "[" ws (value (ws "," ws value)*)? ws "]"
+value      ::= object | array | string | number | boolean | "null"
+boolean    ::= "true" | "false"
+
+string     ::= "\"" char* "\""
+char       ::= [^"\\\x00-\x1F] | "\\" escape
+escape     ::= "\"" | "\\" | "/" | "b" | "f" | "n" | "r" | "t" | "u" hexdigit hexdigit hexdigit hexdigit
+hexdigit   ::= [0-9a-fA-F]
+
+number     ::= "-"? int frac? exp?
+int        ::= "0" | [1-9] [0-9]*
+frac       ::= "." [0-9]+
+exp        ::= ("e" | "E") ("-" | "+")? [0-9]+
+
+## Deliberately bounded (0-1 chars), not the usual [ \t\n]* — unbounded whitespace here
+## let grammar-constrained decoding get stuck emitting whitespace indefinitely on some
+## models (observed with Gemma 4 E2B during the Week-5 gate: it looped past max_tokens
+## after "tool": "list_data" without ever emitting the required comma). A single
+## optional whitespace char is enough to tolerate minor pretty-printing while forcing
+## the decoder toward the next structural token.
+ws         ::= [ \t\n]?

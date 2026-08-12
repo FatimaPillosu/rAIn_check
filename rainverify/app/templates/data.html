@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Data{% endblock %}
+{% block content %}
+<h2>1. Data</h2>
+<details class="explain-panel card" open>
+  <summary>What am I looking at?</summary>
+  <p>Pick a forecast file (NetCDF or GRIB) and an observation CSV. The format is detected
+  from the file's content, not its extension. If the observation file doesn't match the
+  canonical schema, you'll be shown a proposed column mapping to approve before anything
+  is used for scoring.</p>
+</details>
+
+{% if error %}<div class="card" style="border-color:#feb2b2;color:#b23a48">{{ error }}</div>{% endif %}
+
+<form class="card" method="post" action="/data/load">
+  <fieldset>
+    <legend>Forecast file</legend>
+    {% for label, files in available.items() %}
+      {% for f in files %}
+        {% if f.endswith('.nc') or f.endswith('.grib') or f.endswith('.grb') %}
+        <label><input type="radio" name="forecast_choice" value="{{ label }}/{{ f }}"
+          {% if state.forecast_path and state.forecast_path.name == f %}checked{% endif %}> {{ label }}/{{ f }}</label>
+        {% endif %}
+      {% endfor %}
+    {% endfor %}
+  </fieldset>
+  <fieldset>
+    <legend>Observation file</legend>
+    {% for label, files in available.items() %}
+      {% for f in files %}
+        {% if f.endswith('.csv') %}
+        <label><input type="radio" name="obs_choice" value="{{ label }}/{{ f }}"
+          {% if state.obs_path and state.obs_path.name == f %}checked{% endif %}> {{ label }}/{{ f }}</label>
+        {% endif %}
+      {% endfor %}
+    {% endfor %}
+  </fieldset>
+  <button class="btn" type="submit">Load</button>
+</form>
+
+{% if forecast_summary %}
+<div class="card">
+  <h3>Forecast summary</h3>
+  <table>
+    <tr><th>Period</th><td>{{ forecast_summary.period[0] }} to {{ forecast_summary.period[1] }}</td></tr>
+    <tr><th>Lead days</th><td>{{ forecast_summary.leads }}</td></tr>
+    <tr><th>Members</th><td>{{ forecast_summary.members }}</td></tr>
+    <tr><th>Grid</th><td>{{ forecast_summary.grid }}</td></tr>
+  </table>
+</div>
+{% endif %}
+
+{% if state.recipe_needs_review %}
+<div class="card" id="recipe-review-anchor">
+  <p><strong>This observation file needs a recipe.</strong> Reload the page after data/load to review it, or see below.</p>
+</div>
+{% endif %}
+
+{% if obs_summary %}
+<div class="card">
+  <h3>Observations summary</h3>
+  <table>
+    <tr><th>Stations</th><td>{{ obs_summary.stations }}</td></tr>
+    <tr><th>Rows</th><td>{{ obs_summary.rows }}</td></tr>
+    <tr><th>Period</th><td>{{ obs_summary.period[0] }} to {{ obs_summary.period[1] }}</td></tr>
+  </table>
+  {% if state.data_ready() %}<a class="btn" href="/checks">Continue to Checks</a>{% endif %}
+</div>
+{% endif %}
+{% endblock %}

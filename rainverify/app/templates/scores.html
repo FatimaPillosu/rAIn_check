@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Scores{% endblock %}
+{% block content %}
+<h2>3. Scores</h2>
+<details class="explain-panel card" open>
+  <summary>What am I looking at?</summary>
+  <p>Pick lead days and thresholds, then compute. Every figure below comes straight from
+  the deterministic engine — the assistant can propose this step but never generates the
+  numbers itself. CRPS and BSS show 95% confidence intervals from a moving-block
+  bootstrap; any small-sample stratum (n&lt;30) is flagged.</p>
+</details>
+
+<form class="card" method="post" action="/scores/compute">
+  <fieldset>
+    <legend>Lead days</legend>
+    {% for l in available_leads %}
+    <label><input type="checkbox" name="leads" value="{{ l }}"
+      {% if state.score_params.leads and l in state.score_params.leads %}checked{% elif not state.score_params.leads and loop.first %}checked{% endif %}> Lead {{ l }}</label>
+    {% endfor %}
+  </fieldset>
+  <label>Thresholds (mm/24h, comma-separated)
+    <input type="text" name="thresholds" value="{{ state.score_params.thresholds | default(default_thresholds) | join(', ') }}">
+  </label>
+  <button class="btn" type="submit">Compute</button>
+</form>
+
+{% if results %}
+  {% for lead, r in results.items() %}
+  <div class="card">
+    <h3>Lead {{ lead }} — {{ r.pairs|length }} pairs</h3>
+    <table>
+      <tr><th>Bias</th><td>{{ "%.2f"|format(r.bias) }} mm</td>
+          <th>MAE</th><td>{{ "%.2f"|format(r.mae) }} mm</td></tr>
+      <tr><th>CRPS</th>
+          <td>{{ "%.2f"|format(r.crps_bootstrap.estimate) }} mm
+              [{{ "%.2f"|format(r.crps_bootstrap.ci_low) }}, {{ "%.2f"|format(r.crps_bootstrap.ci_high) }}]
+              {% if r.crps_bootstrap.small_sample_warning %}<span class="small-sample">n&lt;30</span>{% endif %}</td>
+          <th>Spread/Error</th><td>{{ "%.2f"|format(r.spread_error.ratio) }}</td></tr>
+    </table>
+
+    <div class="figure-card"><img src="/scores/plot/crps?lead={{ lead }}" alt="CRPS by lead"></div>
+    <div class="figure-card"><img src="/scores/plot/rank_histogram?lead={{ lead }}" alt="Rank histogram"></div>
+    <div class="figure-card"><img src="/scores/plot/spread_error?lead={{ lead }}" alt="Spread vs error"></div>
+    <div class="figure-card"><img src="/scores/plot/bss?lead={{ lead }}" alt="BSS by threshold"></div>
+
+    <h4>By threshold</h4>
+    <table>
+      <tr><th>Threshold</th><th>Brier score</th><th>BSS</th><th>Climatology p</th></tr>
+      {% for t, tr in r.thresholds.items() %}
+      <tr><td>{{ t }}mm</td><td>{{ "%.3f"|format(tr.brier_score) }}</td>
+          <td>{{ "%.3f"|format(tr.bss) }}</td><td>{{ "%.3f"|format(tr.climatology_prob) }}</td></tr>
+      {% endfor %}
+    </table>
+    {% for t in r.thresholds.keys() %}
+    <div class="figure-card"><img src="/scores/plot/reliability?lead={{ lead }}&threshold={{ t }}" alt="Reliability {{ t }}mm"></div>
+    <div class="figure-card"><img src="/scores/plot/roc?lead={{ lead }}&threshold={{ t }}" alt="ROC {{ t }}mm"></div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+  <a class="btn" href="/maps">Continue to Maps &amp; case studies</a>
+{% endif %}
+{% endblock %}

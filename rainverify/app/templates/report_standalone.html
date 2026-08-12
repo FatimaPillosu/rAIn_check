@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>rAIn_check report — {{ manifest.run_id }}</title>
+<style>
+  body { font-family: Arial, sans-serif; color: #1f2933; max-width: 900px; margin: 24px auto; padding: 0 16px; }
+  h1 { font-size: 22px; } h2 { font-size: 18px; border-bottom: 1px solid #d9e2ec; padding-bottom: 4px; margin-top: 32px; }
+  table { border-collapse: collapse; width: 100%; margin: 8px 0; }
+  th, td { text-align: left; border-bottom: 1px solid #d9e2ec; padding: 6px 8px; font-size: 13px; }
+  img { max-width: 100%; border: 1px solid #d9e2ec; margin: 8px 0; }
+  .manifest { font-size: 12px; background: #f8fafc; padding: 12px; border-radius: 6px; white-space: pre-wrap; word-break: break-all; }
+  .sovereignty { background: #ecfdf3; border: 1px solid #b7e4c7; padding: 10px; border-radius: 6px; font-size: 13px; }
+  .interpretation { background: #fffbea; border: 1px solid #fbd38d; padding: 10px; border-radius: 6px; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+  <h1>rAIn_check verification report</h1>
+  <p>Generated {{ generated_utc }} — run <code>{{ manifest.run_id }}</code></p>
+  <div class="sovereignty">Results travel, data doesn't. This report and its manifest were generated
+  entirely on the local machine; no observation data left it.</div>
+
+  <h2>Interpretation</h2>
+  <div class="interpretation">{{ interpretation or "(none provided)" }}</div>
+
+  {% for lead, r in results.items() %}
+  <h2>Lead {{ lead }} ({{ r.pairs|length }} pairs)</h2>
+  <table>
+    <tr><th>Bias</th><td>{{ "%.2f"|format(r.bias) }} mm</td>
+        <th>MAE</th><td>{{ "%.2f"|format(r.mae) }} mm</td></tr>
+    <tr><th>CRPS</th>
+        <td>{{ "%.2f"|format(r.crps_bootstrap.estimate) }} mm
+            [{{ "%.2f"|format(r.crps_bootstrap.ci_low) }}, {{ "%.2f"|format(r.crps_bootstrap.ci_high) }}]</td>
+        <th>Spread/Error</th><td>{{ "%.2f"|format(r.spread_error.ratio) }}</td></tr>
+  </table>
+  <table>
+    <tr><th>Threshold</th><th>Brier score</th><th>BSS</th><th>Climatology p</th></tr>
+    {% for t, tr in r.thresholds.items() %}
+    <tr><td>{{ t }}mm</td><td>{{ "%.3f"|format(tr.brier_score) }}</td>
+        <td>{{ "%.3f"|format(tr.bss) }}</td><td>{{ "%.3f"|format(tr.climatology_prob) }}</td></tr>
+    {% endfor %}
+  </table>
+  {% if ("crps_lead" ~ lead) in figures %}<img src="data:image/png;base64,{{ figures['crps_lead' ~ lead] }}">{% endif %}
+  {% if ("rank_lead" ~ lead) in figures %}<img src="data:image/png;base64,{{ figures['rank_lead' ~ lead] }}">{% endif %}
+  {% if ("bss_lead" ~ lead) in figures %}<img src="data:image/png;base64,{{ figures['bss_lead' ~ lead] }}">{% endif %}
+  {% endfor %}
+
+  {% if 'map_mean' in figures %}
+  <h2>Maps</h2>
+  <img src="data:image/png;base64,{{ figures['map_mean'] }}">
+  <img src="data:image/png;base64,{{ figures['map_exceedance'] }}">
+  {% endif %}
+
+  <h2>Manifest</h2>
+  <p>Input file hashes, code version, and parameters — enough to reproduce this report exactly.</p>
+  <div class="manifest">{{ manifest | tojson(indent=2) }}</div>
+</body>
+</html>

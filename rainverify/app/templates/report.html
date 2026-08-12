@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Report{% endblock %}
+{% block content %}
+<h2>5. Report</h2>
+<details class="explain-panel card" open>
+  <summary>What am I looking at?</summary>
+  <p>Generates a single self-contained HTML file — figures embedded as images, score
+  tables, your typed interpretation, and the run manifest (which files, which code
+  version, which parameters). Print it to PDF from your browser. Results travel, data
+  doesn't: the manifest lets a partner verify exactly what was computed without ever
+  sending the raw observations anywhere.</p>
+</details>
+
+<form class="card" method="post" action="/report/generate">
+  <label>Your interpretation (included in the report)
+    <textarea name="interpretation" rows="6" placeholder="What do these results mean for this period/region?"></textarea>
+  </label>
+  <button class="btn" type="submit">Generate report</button>
+</form>
+{% endblock %}

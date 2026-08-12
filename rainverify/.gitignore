@@ -1,0 +1,24 @@
+# Environment
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Large model weights — downloaded by scripts/, not committed (plan §5: pin versions,
+# not binaries; assistant/models/MODELS.md documents exactly what to fetch and from where)
+assistant/models/*.gguf
+
+# Generated data — regenerated deterministically by scripts/make_golden.py and
+# scripts/make_demo_pack.py, not committed (plan §4.4/§4.5)
+data/golden/*.nc
+data/golden/*.csv
+data/golden/expected.json
+data/samples/*.nc
+data/samples/*.csv
+
+# User-created material never lives in the repository (plan §6)
+workspace/
+
+# OS/editor cruft
+.DS_Store
+Thumbs.db

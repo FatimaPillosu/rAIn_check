@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>rAIn_check — {% block title %}{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/htmx.min.js"></script>
+</head>
+<body>
+  <div class="layout">
+    <nav class="rail">
+      <h1>rAIn_check</h1>
+      <div class="offline-banner">Offline — all data and AI inference stay on this machine</div>
+      <ol>
+        {% for key, label, enabled in rail_steps %}
+        <li>
+          <a href="/{{ key }}" class="{% if key == active_step %}active{% elif not enabled %}disabled{% endif %}">
+            <span class="step-num">{{ loop.index }}.</span>{{ label }}
+          </a>
+        </li>
+        {% endfor %}
+      </ol>
+    </nav>
+
+    <main class="main">
+      {% block content %}{% endblock %}
+    </main>
+
+    <aside class="dock">
+      <h2>Assistant</h2>
+      <form class="model-toggle" hx-post="/chat/model" hx-target="#dock-body" hx-swap="innerHTML">
+        <label for="model-select">Model</label>
+        <select id="model-select" name="model" onchange="this.form.requestSubmit()">
+          <option value="none" {% if assistant_model == 'none' %}selected{% endif %}>None (deterministic guidance)</option>
+          <option value="ministral" {% if assistant_model == 'ministral' %}selected{% endif %}>Ministral 3 3B Instruct</option>
+          <option value="gemma" {% if assistant_model == 'gemma' %}selected{% endif %}>Gemma 4 E2B</option>
+        </select>
+      </form>
+      <div id="dock-body">
+        {% include "partials/dock_body.html" %}
+      </div>
+    </aside>
+  </div>
+</body>
+</html>

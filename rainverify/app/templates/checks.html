@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Checks{% endblock %}
+{% block content %}
+<h2>2. Checks</h2>
+<details class="explain-panel card" open>
+  <summary>What am I looking at?</summary>
+  <p>Quality-control results for the loaded observations: physical range, spikes,
+  duplicates, reporting gaps, and whether the accumulation window matches the forecast.
+  Warnings inform but never block — they carry through into the report.</p>
+</details>
+
+<div class="card">
+  <table>
+    <tr><th>Check</th><th>Status</th><th>Detail</th></tr>
+    {% for name, c in checks.items() %}
+    <tr>
+      <td>{{ c.name }}</td>
+      <td><span class="badge {{ c.status }}">{{ c.status }}</span></td>
+      <td>{{ c.message }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+
+{% if checks.accumulation_window.status == 'fail' %}
+<div class="card" style="border-color:#feb2b2">
+  <strong>Blocking:</strong> the accumulation window mismatch must be resolved before scores can be computed.
+</div>
+{% else %}
+<a class="btn" href="/scores">Continue to Scores</a>
+{% endif %}
+{% endblock %}

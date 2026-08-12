@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Recipe review{% endblock %}
+{% block content %}
+<h2>1. Data — recipe approval</h2>
+<details class="explain-panel card" open>
+  <summary>What am I looking at?</summary>
+  <p>This observation file's columns don't match the canonical schema, so a mapping was
+  proposed automatically. Every inference is shown below as an editable field. Items
+  marked <span class="ask-note">ASK</span> need your judgement — the assistant reads and
+  guesses, you decide, the engine executes. Approving saves this as a reusable recipe.</p>
+</details>
+
+<div class="card">
+  <h3>Source sample</h3>
+  <table>
+    {% for row in recipe.source_sample[:6] %}<tr><td><code>{{ row }}</code></td></tr>{% endfor %}
+  </table>
+</div>
+
+<div class="card">
+  <h3>Notes from the automatic proposal</h3>
+  <ul>
+    {% for note in recipe.notes %}
+      <li class="{% if note.startswith('ASK') %}ask-note{% else %}assumed-note{% endif %}">{{ note }}</li>
+    {% endfor %}
+  </ul>
+</div>
+
+<form class="card" method="post" action="/data/apply_recipe">
+  <h3>Column mapping</h3>
+  <table>
+    <tr><th>Canonical field</th><th>Source column</th></tr>
+    {% for canonical in canonical_columns %}
+    <tr>
+      <td>{{ canonical }}</td>
+      <td>
+        <select name="map__{{ canonical }}">
+          <option value="__none__">— none / use default —</option>
+          {% for raw in raw_columns %}
+          {% set mapped_canonical = recipe.column_map.get(raw) %}
+          <option value="{{ raw }}" {% if mapped_canonical == canonical %}selected{% endif %}>{{ raw }}</option>
+          {% endfor %}
+        </select>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  <label>Date format (leave blank to let pandas infer; e.g. <code>%d/%m/%Y</code>)
+    <input type="text" name="date_format" value="{{ recipe.date_format or '' }}">
+  </label>
+  <label>Precipitation unit factor (multiply source values by this to get mm; 1.0 = already mm)
+    <input type="number" step="any" name="precip_unit_factor" value="{{ recipe.precip_unit_factor }}">
+  </label>
+  <button class="btn" type="submit">Approve and apply</button>
+</form>
+{% endblock %}

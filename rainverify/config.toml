@@ -1,0 +1,28 @@
+# rAIn_check prototype configuration (plan §9: "model path and context length from config.toml")
+
+[assistant]
+# "none" ships with the deterministic L1 assistant (dock, triage, cards, buttons — no
+# free-form generation). Set to "gemma" or "ministral" to enable L3 free-form chat.
+active_model = "ministral"
+context_length = 2048
+max_tokens_per_reply = 300
+n_threads = 8
+
+[assistant.models.gemma]
+label = "Gemma 4 E2B (IQ4_XS)"
+path = "assistant/models/gemma-4-E2B-it-IQ4_XS.gguf"
+licence = "Apache 2.0"
+chat_format = "gemma"
+
+[assistant.models.ministral]
+label = "Ministral 3 3B Instruct 2512 (Q4_K_M)"
+path = "assistant/models/ministral-3-3b-instruct-2512-Q4_K_M.gguf"
+licence = "Apache 2.0"
+chat_format = "mistral-instruct"
+
+[engine]
+ram_budget_mb = 1200
+
+[app]
+ram_budget_mb = 300
+port = 8501

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Maps{% endblock %}
+{% block content %}
+<h2>4. Maps &amp; case studies</h2>
+<details class="explain-panel card" open>
+  <summary>What am I looking at?</summary>
+  <p>Maps are static PNGs — an explicit old-browser and memory choice. Pick a forecast
+  run date, lead day, and threshold below. Station observations are overlaid where
+  available; filled circles on the exceedance map mark stations that reported at or
+  above the chosen threshold.</p>
+</details>
+
+<form class="card" method="post" action="/maps/select">
+  <label>Forecast run date
+    <select name="ref_time">
+      {% for t in ref_time_options %}<option value="{{ t }}" {% if t == state.map_ref_time %}selected{% endif %}>{{ t }}</option>{% endfor %}
+    </select>
+  </label>
+  <label>Lead day
+    <select name="lead">
+      {% for l in lead_options %}<option value="{{ l }}" {% if l == state.map_lead %}selected{% endif %}>{{ l }}</option>{% endfor %}
+    </select>
+  </label>
+  <label>Threshold (mm/24h)
+    <input type="number" step="any" name="threshold" value="{{ state.map_threshold }}">
+  </label>
+  <button class="btn" type="submit">Update maps</button>
+</form>
+
+<div class="card figure-card"><h3>Ensemble mean</h3><img src="/maps/plot/mean"></div>
+<div class="card figure-card"><h3>Exceedance probability</h3><img src="/maps/plot/exceedance"></div>
+<div class="card figure-card"><h3>Postage-stamp members</h3><img src="/maps/plot/postage_stamp"></div>
+
+<a class="btn" href="/report">Continue to Report</a>
+{% endblock %}
