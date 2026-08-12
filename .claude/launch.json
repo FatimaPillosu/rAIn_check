@@ -2,9 +2,9 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "rainverify",
-      "runtimeExecutable": "rainverify/.venv/Scripts/python.exe",
-      "runtimeArgs": ["rainverify/run_dev.py"],
+      "name": "rAIn_check",
+      "runtimeExecutable": "rAIn_check/.venv/Scripts/python.exe",
+      "runtimeArgs": ["rAIn_check/run_dev.py"],
       "port": 8501
     }
   ]
