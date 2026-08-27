@@ -1,0 +1,43 @@
+/* rAIn_check — rainfall accent palette (light + dark) */
+:root {
+  --md-primary-fg-color:        #1f6feb;
+  --md-primary-fg-color--light: #4b8bf4;
+  --md-primary-fg-color--dark:  #1a5fd0;
+  --md-accent-fg-color:         #8957e5;
+  --md-accent-fg-color--transparent: #8957e51a;
+}
+
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color:        #4b8bf4;
+  --md-accent-fg-color:         #a884f0;
+  --md-default-bg-color:        #0d1117;
+}
+
+/* Centered hero: badges sit on one comfortable row */
+.md-typeset div[align="center"] img {
+  display: inline-block;
+  margin: 0.15rem 0.2rem;
+}
+
+/* Screenshots: soft frame so they read as UI, not page chrome */
+.md-typeset img[src*="images/"] {
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.18), 0 6px 18px rgba(0,0,0,.12);
+  max-width: 100%;
+}
+
+/* Mermaid diagrams: give them room and center them */
+.md-typeset .mermaid {
+  margin: 1.4rem auto;
+  text-align: center;
+}
+
+/* Tables: a touch more breathing room for the comparison-heavy pages */
+.md-typeset table:not([class]) th {
+  background: var(--md-accent-fg-color--transparent);
+}
+
+/* Tighten the big centered H1 hero on the landing page */
+.md-typeset div[align="center"] h1 {
+  margin-bottom: .2rem;
+}
